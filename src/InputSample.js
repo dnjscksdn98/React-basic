@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 function InputSample() {
     const [inputs, setInputs] = useState({
         name: '',
         nickname: '',
     });
+
+    const nameInput = useRef();
     const { name, nickname } = inputs;
 
     const onChange = (e) => {
@@ -29,6 +31,8 @@ function InputSample() {
             name: '',
             nickname: '',
         });
+        // current -> 현재 가리키는 DOM 을 선택한다
+        nameInput.current.focus();
     };
 
     return (
@@ -38,6 +42,7 @@ function InputSample() {
                 placeholder="이름"
                 onChange={onChange}
                 value={name}
+                ref={nameInput}
             />
             <input
                 name="nickname"
