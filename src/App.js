@@ -1,4 +1,10 @@
-import React, { useRef, useCallback, useMemo, useReducer } from "react";
+import React, {
+  useRef,
+  useCallback,
+  useMemo,
+  useReducer,
+  createContext
+} from "react";
 import UserList from "./UserList";
 import CreateUser from "./CreateUser";
 
@@ -67,6 +73,12 @@ function countActiveUsers(users) {
   return users.filter(user => user.active).length;
 }
 
+// create a context
+// default value is null
+// export: you can use it anywhere if import
+// it is easier using context if useReducer
+export const UserDispatch = createContext(null);
+
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const nextId = useRef(4);
@@ -94,33 +106,36 @@ function App() {
     nextId.current += 1;
   }, [username, email]);
 
-  const onToggle = useCallback(id => {
-    dispatch({
-      type: "TOGGLE_USER",
-      id
-    });
-  }, []);
+  // we send onToggle and onRemove to UserList because we need to send it to User
+  // so use ContextAPI
+  // const onToggle = useCallback(id => {
+  //   dispatch({
+  //     type: "TOGGLE_USER",
+  //     id
+  //   });
+  // }, []);
 
-  const onRemove = useCallback(id => {
-    dispatch({
-      type: "REMOVE_USER",
-      id
-    });
-  }, []);
+  // const onRemove = useCallback(id => {
+  //   dispatch({
+  //     type: "REMOVE_USER",
+  //     id
+  //   });
+  // }, []);
 
   const count = useMemo(() => countActiveUsers(users), [users]);
 
   return (
-    <>
+    // set the context as dispatch
+    <UserDispatch.Provider value={dispatch}>
       <CreateUser
         username={username}
         email={email}
         onChange={onChange}
         onCreate={onCreate}
       />
-      <UserList users={users} onToggle={onToggle} onRemove={onRemove} />
+      <UserList users={users} />
       <div>활성 사용자 수: {count}</div>
-    </>
+    </UserDispatch.Provider>
   );
 }
 
