@@ -1,14 +1,7 @@
-import React, {
-  useRef,
-  useCallback,
-  useMemo,
-  useReducer,
-  createContext
-} from "react";
+import React, { useMemo, useReducer, createContext } from "react";
 import UserList from "./UserList";
 import CreateUser from "./CreateUser";
 
-// useReducer
 const initialState = {
   inputs: {
     username: "",
@@ -36,6 +29,7 @@ const initialState = {
   ]
 };
 
+// reducer
 function reducer(state, action) {
   switch (action.type) {
     case "CHANGE_INPUT":
@@ -48,20 +42,20 @@ function reducer(state, action) {
       };
     case "CREATE_USER":
       return {
-        inputs: initialState.inputs,
-        users: state.users.concat(action.user)
+        inputs: initialState.inputs, // clear the username and email
+        users: state.users.concat(action.user) // add a new user
       };
     case "TOGGLE_USER":
       return {
         ...state,
         users: state.users.map(user =>
           user.id === action.id ? { ...user, active: !user.active } : user
-        )
+        ) // if it's the clicked id, then switch active
       };
     case "REMOVE_USER":
       return {
         ...state,
-        users: state.users.filter(user => user.id !== action.id)
+        users: state.users.filter(user => user.id !== action.id) // if it's the deleted id, then don't add to users
       };
     default:
       throw new Error("Unhandled action");
@@ -74,56 +68,20 @@ function countActiveUsers(users) {
 }
 
 // create a context
-// default value is null
-// export: you can use it anywhere if import
-// it is easier using context if useReducer
+// param: default value
+// export: it is usable anywhere if import
+// it is easier using context api when using useReducer
 export const UserDispatch = createContext(null);
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { users } = state;
 
-  // const onChange = useCallback(e => {
-  //   const { name, value } = e.target;
-  //   dispatch({
-  //     type: "CHANGE_INPUT",
-  //     name,
-  //     value
-  //   });
-  // }, []);
-
-  // const onCreate = useCallback(() => {
-  //   dispatch({
-  //     type: "CREATE_USER",
-  //     user: {
-  //       id: nextId.current,
-  //       username,
-  //       email
-  //     }
-  //   });
-  //   nextId.current += 1;
-  // }, [username, email]);
-
-  // we send onToggle and onRemove to UserList because we need to send it to User
-  // so use ContextAPI
-  // const onToggle = useCallback(id => {
-  //   dispatch({
-  //     type: "TOGGLE_USER",
-  //     id
-  //   });
-  // }, []);
-
-  // const onRemove = useCallback(id => {
-  //   dispatch({
-  //     type: "REMOVE_USER",
-  //     id
-  //   });
-  // }, []);
-
+  // useMemo: reuse the memoized value when no deps has changed
   const count = useMemo(() => countActiveUsers(users), [users]);
 
   return (
-    // set the context as dispatch
+    // Provider: sets the context value = dispatch
     <UserDispatch.Provider value={dispatch}>
       <CreateUser />
       <UserList users={users} />

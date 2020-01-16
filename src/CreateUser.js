@@ -1,21 +1,22 @@
 import React, { useRef, useContext } from "react";
 import useInputs from "./hooks/useInputs";
-import { UserDispatch } from "./App";
+import { UserDispatch } from "./App"; // import the context api
 
 function CreateUser() {
+  // use the inputs custom hook
   const [{ username, email }, onChange, reset] = useInputs({
     username: "",
     email: ""
   });
 
-  const nextId = useRef(4);
-  const dispatch = useContext(UserDispatch);
+  const nextId = useRef(4); // the id for the created user
+  const dispatch = useContext(UserDispatch); // useContext: use the context that was imported
 
   const onCreate = () => {
     dispatch({
       type: "CREATE_USER",
       user: {
-        id: nextId.current,
+        id: nextId.current, // current: returns the current value
         username,
         email
       }
@@ -43,5 +44,4 @@ function CreateUser() {
   );
 }
 
-// React.memo: props 가 바뀔때만 리렌더링 한다
-export default React.memo(CreateUser);
+export default CreateUser;
