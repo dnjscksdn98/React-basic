@@ -1,4 +1,6 @@
 import React, { useMemo, useReducer, createContext } from "react";
+import produce from "immer";
+
 import UserList from "./UserList";
 import CreateUser from "./CreateUser";
 
@@ -29,34 +31,45 @@ const initialState = {
   ]
 };
 
+// 불변성 지키기
+// objects : ...spread
+// arrays : concat, filter, map
+
+// immer(library) : 불변성을 해치는 코드를 작성해도 대신 불변성 유지를 해준다
+// produce(state, draft => {})
+// produce(draft => {}) : it will be a updator function
+
 // reducer
 function reducer(state, action) {
   switch (action.type) {
-    case "CHANGE_INPUT":
-      return {
-        ...state, // 불변성을 지키기 위해, 먼저 복사를 한다
-        inputs: {
-          ...state.inputs,
-          [action.name]: action.value
-        }
-      };
     case "CREATE_USER":
-      return {
-        inputs: initialState.inputs, // clear the username and email
-        users: state.users.concat(action.user) // add a new user
-      };
+      return produce(state, draft => {
+        draft.users.push(action.user);
+      });
+
+    // return {
+    //   users: state.users.concat(action.user) // add a new user
+    // };
     case "TOGGLE_USER":
-      return {
-        ...state,
-        users: state.users.map(user =>
-          user.id === action.id ? { ...user, active: !user.active } : user
-        ) // if it's the clicked id, then switch active
-      };
+      return produce(state, draft => {
+        const user = draft.users.find(user => user.id === action.id);
+        user.active = !user.active;
+      });
+
+    // return {
+    //   users: state.users.map(user =>
+    //     user.id === action.id ? { ...user, active: !user.active } : user
+    //   ) // if it's the clicked id, then switch active
+    // };
     case "REMOVE_USER":
-      return {
-        ...state,
-        users: state.users.filter(user => user.id !== action.id) // if it's the deleted id, then don't add to users
-      };
+      return produce(state, draft => {
+        const index = draft.users.findIndex(user => user.id === action.id);
+        draft.users.splice(index, 1); // delete one element from the index
+      });
+
+    // return {
+    //   users: state.users.filter(user => user.id !== action.id) // if it's the deleted id, then don't add to users
+    // };
     default:
       throw new Error("Unhandled action");
   }
